@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nut Catch - Charity Edition</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+
+    <!-- Der Türsteher: Das Passwort-Fenster -->
+    <div id="login-screen">
+        <h1>Willkommen, Wusel! 🐿️</h1>
+        <p>Vielen Dank für deinen Support bei der Spendenaktion.</p>
+        <p>Bitte gib das geheime Passwort ein:</p>
+        <input type="password" id="password-input" placeholder="Passwort">
+        <button id="login-button">Spiel starten</button>
+        <p id="error-msg" style="display: none; color: #ff5555; margin-top: 10px;">Falsches Passwort!</p>
+    </div>
+
+    <!-- Das eigentliche Spielfeld -->
+    <div id="game-container" style="display: none;">
+        <canvas id="gameCanvas" width="1920" height="1080"></canvas>
+    </div>
+
+    <!-- NEU: Das Highscore-Fenster (Legt sich über das Spielfeld) -->
+    <div id="highscore-screen" style="display: none;">
+        <h2>🏆 Top 10 Highscores 🏆</h2>
+        <ul id="highscore-list">
+            <!-- Wird vom Code gefüllt -->
+        </ul>
+        <p id="countdown-text">Nächste Runde startet in 10 Sekunden...</p>
+        <button id="restart-button" style="display: none;">Jetzt neu starten</button>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
