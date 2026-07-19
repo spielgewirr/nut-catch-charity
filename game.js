@@ -260,4 +260,4 @@ function displayHighscores() {
         highscoreScreen.style.display = "none";
         startGame();
     };
-}
+} // Diese schließende Klammer gehört zu function displayHighscores()
