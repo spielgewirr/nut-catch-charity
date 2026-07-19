@@ -1,2 +1,4 @@
 - name: Highscore Skript ausführen
-        run: echo "Bot pausiert"
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: node post_highscore.js
