@@ -157,22 +157,7 @@ function gameLoop() {
 function endGame(timerInterval) {
     gameActive = false;
     clearInterval(timerInterval);
-    
-    setTimeout(() => {
-        let playerName = prompt(`Zeit abgelaufen! Du hast ${score} Punkte gesammelt.\nTrage deinen Namen ein:`);
-        
-        if(playerName && playerName.trim() !== "") {
-            saveHighscore(playerName, score);
-        }
-        displayHighscores();
-    }, 100);
-}
-
-function saveHighscore(name, finalScore) {
-    let allScores = JSON.parse(localStorage.getItem('nutCatchScores') || "[]");
-    allScores.push({ name: name, score: finalScore });
-    allScores.sort((a, b) => b.score - a.score);
-    localStorage.setItem('nutCatchScores', JSON.stringify(allScores.slice(0, 10)));
+    displayHighscores();
 }
 
 function displayHighscores() {
@@ -180,18 +165,17 @@ function displayHighscores() {
     const list = document.getElementById("highscore-list");
     const countdownText = document.getElementById("countdown-text");
     const restartButton = document.getElementById("restart-button");
-    
+    const heading = document.querySelector("#highscore-screen h2");
+
     highscoreScreen.style.display = "block";
-    list.innerHTML = "";
+    if (heading) heading.innerText = "Dein Score";
+    
+    list.innerHTML = `<li style="list-style: none; margin-top: 20px; font-size: 24px;">
+        Du hast gerade <b>${score} Punkte</b> gesammelt! 🐿️
+    </li>`;
+
     restartButton.style.display = "none";
     countdownText.style.display = "block";
-
-    // Wir holen nur den Score, den der Spieler gerade eben erzielt hat
-    // Da wir ihn in 'score' gespeichert haben, zeigen wir ihn direkt an:
-    list.innerHTML = `<li style="font-size: 24px; list-style: none; margin-top: 20px;">
-        Du hast gerade <b>${score} Punkte</b> mit gefangenen Nüssen erzielt!<br><br>
-        Weiter so! 🐿️
-    </li>`;
 
     let waitTime = 10;
     countdownText.innerText = `Nächste Runde möglich in ${waitTime} Sekunden...`;
