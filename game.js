@@ -194,8 +194,10 @@ function saveHighscore(name, finalScore) {
     newScoreRef.set({
         name: name,
         score: finalScore,
+        passwordCheck: SECRET_PASSWORD, // Schickt das Passwort verschlüsselt mit
         timestamp: firebase.database.ServerValue.TIMESTAMP
     });
+}
 }
 
 // NEU: Highscore abrufen und 10 Sekunden warten
