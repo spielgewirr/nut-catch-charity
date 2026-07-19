@@ -1,7 +1,6 @@
 const SECRET_PASSWORD = "1aWuselSupport2026";
 
-// Füge hier wieder deinen kopierten Firebase-Config Block ein:
-// Your web app's Firebase configuration
+// Deine Firebase-Konfiguration
 const firebaseConfig = {
   apiKey: "AIzaSyB3ecrvvJvBK7OzRysFXRSmPEOnVHQXIxE",
   authDomain: "eichhoernchen-charity.firebaseapp.com",
@@ -54,8 +53,6 @@ function startGame() {
     timeLeft = 60;
     nuts = [];
     gameActive = true;
-    
-    // Setzt das Eichhörnchen wieder in die Mitte
     squirrel.x = 1920 / 2 - 100;
     
     const timerInterval = setInterval(() => {
@@ -70,7 +67,6 @@ function startGame() {
     gameLoop();
 }
 
-// Steuerung
 window.addEventListener("keydown", (e) => {
     if (e.code === "ArrowLeft" || e.code === "KeyA") squirrel.movingLeft = true;
     if (e.code === "ArrowRight" || e.code === "KeyD") squirrel.movingRight = true;
@@ -151,15 +147,14 @@ function drawGame() {
         }
     }
 
-    // NEU: Text mit 5px schwarzem Rand
     ctx.font = "bold 60px sans-serif";
-    ctx.lineWidth = 5;         // 5 Pixel Rand
-    ctx.strokeStyle = "black"; // Randfarbe
-    ctx.fillStyle = "white";   // Füllfarbe
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = "white";
 
     ctx.textAlign = "left";
-    ctx.strokeText("Punkte: " + score, 40, 80); // Zeichnet erst den schwarzen Rand
-    ctx.fillText("Punkte: " + score, 40, 80);   // Legt die weiße Schrift darüber
+    ctx.strokeText("Punkte: " + score, 40, 80);
+    ctx.fillText("Punkte: " + score, 40, 80);
 
     ctx.textAlign = "right";
     ctx.strokeText("Zeit: " + timeLeft + "s", 1920 - 40, 80);
@@ -183,8 +178,6 @@ function endGame(timerInterval) {
         if(playerName && playerName.trim() !== "") {
             saveHighscore(playerName, score);
         }
-        
-        // Statt location.reload() starten wir jetzt die Highscore-Anzeige
         displayHighscores();
     }, 100);
 }
@@ -194,13 +187,11 @@ function saveHighscore(name, finalScore) {
     newScoreRef.set({
         name: name,
         score: finalScore,
-        passwordCheck: SECRET_PASSWORD, // Schickt das Passwort verschlüsselt mit
+        passwordCheck: SECRET_PASSWORD,
         timestamp: firebase.database.ServerValue.TIMESTAMP
     });
 }
-}
 
-// NEU: Highscore abrufen und 10 Sekunden warten
 function displayHighscores() {
     const highscoreScreen = document.getElementById("highscore-screen");
     const list = document.getElementById("highscore-list");
@@ -212,15 +203,12 @@ function displayHighscores() {
     restartButton.style.display = "none";
     countdownText.style.display = "block";
 
-    // Holt die Top 10 aus Firebase
     database.ref('highscores').orderByChild('score').limitToLast(10).once('value')
         .then((snapshot) => {
             let scoresArray = [];
             snapshot.forEach((child) => {
                 scoresArray.push(child.val());
             });
-            
-            // Firebase sortiert aufsteigend, also drehen wir es um (beste oben)
             scoresArray.reverse();
             
             list.innerHTML = "";
@@ -228,19 +216,15 @@ function displayHighscores() {
                 list.innerHTML = "<li>Noch keine Einträge!</li>";
             } else {
                 scoresArray.forEach((entry, index) => {
-                    let medal = "";
-                    if(index === 0) medal = "🥇 ";
-                    if(index === 1) medal = "🥈 ";
-                    if(index === 2) medal = "🥉 ";
+                    let medal = index < 3 ? ["🥇 ", "🥈 ", "🥉 "][index] : "";
                     list.innerHTML += `<li>${medal}${entry.name}: <b>${entry.score}</b></li>`;
                 });
             }
         })
-        .catch((error) => {
-            list.innerHTML = "Fehler beim Laden der Highscores.";
+        .catch(() => {
+            list.innerHTML = "Fehler beim Laden.";
         });
 
-    // 10 Sekunden Timer starten
     let waitTime = 10;
     countdownText.innerText = `Nächste Runde möglich in ${waitTime} Sekunden...`;
     
@@ -251,13 +235,12 @@ function displayHighscores() {
         } else {
             clearInterval(countdownInterval);
             countdownText.style.display = "none";
-            restartButton.style.display = "inline-block"; // Button anzeigen
+            restartButton.style.display = "inline-block";
         }
     }, 1000);
 
-    // Klick auf Neu Starten
     restartButton.onclick = () => {
         highscoreScreen.style.display = "none";
         startGame();
     };
-} // Diese schließende Klammer gehört zu function displayHighscores()
+}
