@@ -186,16 +186,12 @@ function displayHighscores() {
     restartButton.style.display = "none";
     countdownText.style.display = "block";
 
-    let scoresArray = JSON.parse(localStorage.getItem('nutCatchScores') || "[]");
-    
-    if(scoresArray.length === 0) {
-        list.innerHTML = "<li>Noch keine Einträge!</li>";
-    } else {
-        scoresArray.forEach((entry, index) => {
-            let medal = index < 3 ? ["🥇 ", "🥈 ", "🥉 "][index] : "";
-            list.innerHTML += `<li>${medal}${entry.name}: <b>${entry.score}</b></li>`;
-        });
-    }
+    // Wir holen nur den Score, den der Spieler gerade eben erzielt hat
+    // Da wir ihn in 'score' gespeichert haben, zeigen wir ihn direkt an:
+    list.innerHTML = `<li style="font-size: 24px; list-style: none; margin-top: 20px;">
+        Du hast gerade <b>${score} Punkte</b> mit gefangenen Nüssen erzielt!<br><br>
+        Weiter so! 🐿️
+    </li>`;
 
     let waitTime = 10;
     countdownText.innerText = `Nächste Runde möglich in ${waitTime} Sekunden...`;
