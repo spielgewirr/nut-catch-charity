@@ -21,4 +21,4 @@ jobs:
       - name: Highscore Skript ausführen
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        run: node run_score.js
+        run: run: node dump.js
