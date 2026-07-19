@@ -1,4 +1,23 @@
-- name: Highscore Skript ausführen
+name: Woechentlicher Highscore Post
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 16 * * 0'
+
+jobs:
+  post-to-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Code herunterladen
+        uses: actions/checkout@v3
+
+      - name: Node.js einrichten
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Highscore Skript ausführen
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: node post_highscore.js
