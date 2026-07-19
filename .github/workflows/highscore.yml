@@ -1,8 +1,6 @@
 name: Woechentlicher Highscore Post
 
 on:
-  schedule:
-    - cron: '0 16 * * 0'
   workflow_dispatch:
 
 jobs:
@@ -10,14 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Code herunterladen
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Node.js einrichten
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Highscore Skript ausführen
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        run: node dump.js
+        run: node clean_post.js
