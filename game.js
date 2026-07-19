@@ -1,19 +1,5 @@
 const SECRET_PASSWORD = "1aWuselSupport2026";
 
-// Deine Firebase-Konfiguration
-const firebaseConfig = {
-  apiKey: "AIzaSyB3ecrvvJvBK7OzRysFXRSmPEOnVHQXIxE",
-  authDomain: "eichhoernchen-charity.firebaseapp.com",
-  databaseURL: "https://eichhoernchen-charity-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "eichhoernchen-charity",
-  storageBucket: "eichhoernchen-charity.firebasestorage.app",
-  messagingSenderId: "199113442226",
-  appId: "1:199113442226:web:133e97760ae8854156daab"
-};
-
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -183,13 +169,10 @@ function endGame(timerInterval) {
 }
 
 function saveHighscore(name, finalScore) {
-    const newScoreRef = database.ref('highscores').push();
-    newScoreRef.set({
-        name: name,
-        score: finalScore,
-        passwordCheck: SECRET_PASSWORD,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-    });
+    let allScores = JSON.parse(localStorage.getItem('nutCatchScores') || "[]");
+    allScores.push({ name: name, score: finalScore });
+    allScores.sort((a, b) => b.score - a.score);
+    localStorage.setItem('nutCatchScores', JSON.stringify(allScores.slice(0, 10)));
 }
 
 function displayHighscores() {
@@ -199,31 +182,20 @@ function displayHighscores() {
     const restartButton = document.getElementById("restart-button");
     
     highscoreScreen.style.display = "block";
-    list.innerHTML = "Lade Highscores... 🐿️";
+    list.innerHTML = "";
     restartButton.style.display = "none";
     countdownText.style.display = "block";
 
-    database.ref('highscores').orderByChild('score').limitToLast(10).once('value')
-        .then((snapshot) => {
-            let scoresArray = [];
-            snapshot.forEach((child) => {
-                scoresArray.push(child.val());
-            });
-            scoresArray.reverse();
-            
-            list.innerHTML = "";
-            if(scoresArray.length === 0) {
-                list.innerHTML = "<li>Noch keine Einträge!</li>";
-            } else {
-                scoresArray.forEach((entry, index) => {
-                    let medal = index < 3 ? ["🥇 ", "🥈 ", "🥉 "][index] : "";
-                    list.innerHTML += `<li>${medal}${entry.name}: <b>${entry.score}</b></li>`;
-                });
-            }
-        })
-        .catch(() => {
-            list.innerHTML = "Fehler beim Laden.";
+    let scoresArray = JSON.parse(localStorage.getItem('nutCatchScores') || "[]");
+    
+    if(scoresArray.length === 0) {
+        list.innerHTML = "<li>Noch keine Einträge!</li>";
+    } else {
+        scoresArray.forEach((entry, index) => {
+            let medal = index < 3 ? ["🥇 ", "🥈 ", "🥉 "][index] : "";
+            list.innerHTML += `<li>${medal}${entry.name}: <b>${entry.score}</b></li>`;
         });
+    }
 
     let waitTime = 10;
     countdownText.innerText = `Nächste Runde möglich in ${waitTime} Sekunden...`;
