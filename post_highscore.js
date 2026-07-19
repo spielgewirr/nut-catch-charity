@@ -29,7 +29,7 @@ async function postHighscore() {
         message += `${medals[i]} **${entry.name}** mit ${entry.score} Punkten\n`;
     });
     
-    message += `\nSpiele jetzt mit und rette Eichhörnchen: ${GAME_LINK}`;
+    message += `\nSpiele jetzt mit und fange so viele Nüffe wie möglich!: ${GAME_LINK}`;
 
     // Nachricht an Discord senden
     console.log("Sende an Discord...");
