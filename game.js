@@ -171,7 +171,7 @@ function displayHighscores() {
     if (heading) heading.innerText = "Dein Score";
     
     list.innerHTML = `<li style="list-style: none; margin-top: 20px; font-size: 24px;">
-        Du hast gerade <b>${score} Punkte</b> gesammelt! 🐿️
+        Du hast gerade <b>${score} Punkte</b> gesammelt! ✨🐿️
     </li>`;
 
     restartButton.style.display = "none";
