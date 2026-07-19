@@ -1,21 +1,2 @@
-name: Woechentlicher Highscore Post
-
-on:
-  workflow_dispatch:
-
-jobs:
-  post-to-discord:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Code herunterladen
-        uses: actions/checkout@v4
-
-      - name: Node.js einrichten
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Highscore Skript ausführen
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        run: node clean_post.js
+- name: Highscore Skript ausführen
+        run: echo "Bot pausiert"
