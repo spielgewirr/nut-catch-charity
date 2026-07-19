@@ -2,9 +2,8 @@ name: Woechentlicher Highscore Post
 
 on:
   schedule:
-    # Jeden Sonntag um 16:00 Uhr UTC (Das entspricht 18:00 Uhr deutscher Sommerzeit)
     - cron: '0 16 * * 0'
-  workflow_dispatch: # Erlaubt es dir, das Skript zum Testen manuell per Knopfdruck zu starten
+  workflow_dispatch:
 
 jobs:
   post-to-discord:
@@ -21,4 +20,4 @@ jobs:
       - name: Highscore Skript ausführen
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        run: run: node dump.js
+        run: node dump.js
