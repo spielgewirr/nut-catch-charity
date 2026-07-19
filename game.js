@@ -1,4 +1,4 @@
-const SECRET_PASSWORD = "Test2026";
+const SECRET_PASSWORD = "1aWuselSupport2026";
 
 // Füge hier wieder deinen kopierten Firebase-Config Block ein:
 // Your web app's Firebase configuration
