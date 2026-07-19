@@ -35,5 +35,21 @@
     </div>
 
     <script src="game.js"></script>
+
+    <audio id="bg-music" loop>
+  <source src="assets/audio/soundtrack.mp3" type="audio/mpeg">
+  Dein Browser unterstützt keine Musikwiedergabe.
+</audio>
+
+<script>
+  // Musik startet, sobald der User das erste Mal irgendwo klickt
+  window.addEventListener('click', () => {
+      const music = document.getElementById('bg-music');
+      if (music.paused) {
+          music.volume = 0.3; // Lautstärke auf 30%
+          music.play();
+      }
+  }, { once: true });
+</script>
 </body>
 </html>
