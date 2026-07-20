@@ -1,5 +1,3 @@
-const SECRET_PASSWORD = "1aWuselSupport2026";
-
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -16,11 +14,16 @@ const goldNutImg = new Image(); goldNutImg.src = "goldnut.png";
 const bombImg = new Image(); bombImg.src = "bombnut.png";
 
 const squirrel = {
-    x: 1920 / 2 - 100, y: 1080 - 220, width: 200, height: 200, speed: 15,
-    movingLeft: false, movingRight: false
+    x: 1920 / 2 - 100,
+    y: 1080 - 220,
+    width: 200,
+    height: 200,
+    speed: 15,
+    movingLeft: false,
+    movingRight: false
 };
 
-// Steuerung
+// --- Steuerung ---
 window.addEventListener("keydown", (e) => {
     if (e.code === "ArrowLeft" || e.code === "KeyA") squirrel.movingLeft = true;
     if (e.code === "ArrowRight" || e.code === "KeyD") squirrel.movingRight = true;
@@ -29,28 +32,29 @@ window.addEventListener("keyup", (e) => {
     if (e.code === "ArrowLeft" || e.code === "KeyA") squirrel.movingLeft = false;
     if (e.code === "ArrowRight" || e.code === "KeyD") squirrel.movingRight = false;
 });
+
 window.addEventListener("touchstart", (e) => {
+    // Verhindert Zoomen/Scrollen auf mobilen Geräten während des Spiels
+    e.preventDefault();
     if(!gameActive) return;
     const touchX = e.touches[0].clientX;
     const screenWidth = window.innerWidth;
     if(touchX < screenWidth / 2) squirrel.movingLeft = true;
     else squirrel.movingRight = true;
-});
+}, { passive: false });
+
 window.addEventListener("touchend", () => {
     squirrel.movingLeft = false;
     squirrel.movingRight = false;
 });
 
-document.getElementById("login-button").addEventListener("click", () => {
-    const input = document.getElementById("password-input").value;
-    if (input === SECRET_PASSWORD) {
-        document.getElementById("login-screen").style.display = "none";
-        document.getElementById("game-container").style.display = "flex";
-        startGame();
-    } else {
-        document.getElementById("error-msg").style.display = "block";
-    }
-});
+// --- Spiel-Logik ---
+
+// Spiel startet sofort beim Laden der Seite
+window.onload = () => {
+    // Prüfen, ob Bilder geladen sind, um Darstellungsfehler zu vermeiden
+    startGame();
+};
 
 function startGame() {
     score = 0;
@@ -62,21 +66,36 @@ function startGame() {
     const timerInterval = setInterval(() => {
         if(gameActive) {
             timeLeft--;
-            if(timeLeft <= 0) endGame(timerInterval);
+            if(timeLeft <= 0) {
+                endGame(timerInterval);
+            }
         }
     }, 1000);
+
     gameLoop();
 }
 
 function spawnNut() {
     let rand = Math.random();
     let type = 'normal';
-    if (rand < 0.05) type = 'bomb';
-    else if (rand < 0.15) type = 'gold';
+    
+    if (rand < 0.05) {
+        type = 'bomb'; // 5% Chance auf Bombe
+    } else if (rand < 0.15) {
+        type = 'gold'; // 10% Chance auf Gold
+    }
+
+    let speed;
+    if (type === 'bomb') speed = 15;
+    else if (type === 'gold') speed = 14;
+    else speed = 8; // normal
 
     nuts.push({
-        x: Math.random() * (1920 - 60), y: -60, width: 60, height: 60,
-        speed: type === 'bomb' ? 15 : (type === 'gold' ? 14 : 9),
+        x: Math.random() * (1920 - 60),
+        y: -60,
+        width: 60,
+        height: 60,
+        speed: speed + (Math.random() * 3), // Leichte Zufallsgeschwindigkeit
         type: type
     });
 }
@@ -86,51 +105,90 @@ function updateGame() {
     if (squirrel.movingRight && squirrel.x < 1920 - squirrel.width) squirrel.x += squirrel.speed;
 
     dropTimer++;
-    if (dropTimer > 30) { spawnNut(); dropTimer = 0; }
+    if (dropTimer > 30) { // Spawn-Rate
+        spawnNut();
+        dropTimer = 0;
+    }
 
     for (let i = nuts.length - 1; i >= 0; i--) {
         let n = nuts[i];
         n.y += n.speed;
 
-        if (n.x < squirrel.x + squirrel.width && n.x + n.width > squirrel.x &&
-            n.y < squirrel.y + squirrel.height && n.y + n.height > squirrel.y) {
+        // Kollisionsabfrage
+        if (n.x < squirrel.x + squirrel.width &&
+            n.x + n.width > squirrel.x &&
+            n.y < squirrel.y + squirrel.height &&
+            n.y + n.height > squirrel.y) {
             
             if (n.type === 'bomb') {
-                new Audio('bang.mp3').play();
+                // Bombe getroffen: Spiel sofort vorbei
+                new Audio('bang.mp3').play().catch(e => console.log("Sound konnte nicht abgespielt werden", e));
                 gameActive = false;
                 endGame(null);
                 return;
             }
             
-            score += (n.type === 'gold') ? 50 : 10;
+            // Punktevergabe
+            if (n.type === 'gold') {
+                score += 50;
+            } else {
+                score += 10;
+            }
+            
             nuts.splice(i, 1);
             continue;
         }
-        if (n.y > 1080) nuts.splice(i, 1);
+
+        // Entfernen, wenn unten rausgefallen
+        if (n.y > 1080) {
+            nuts.splice(i, 1);
+        }
     }
 }
 
 function drawGame() {
+    // Canvas leeren
     ctx.clearRect(0, 0, 1920, 1080);
+    
+    // Hintergrund zeichnen
     if(bgImg.complete) ctx.drawImage(bgImg, 0, 0, 1920, 1080);
-    if(squirrelImg.complete) ctx.drawImage(squirrelImg, squirrel.x, squirrel.y, squirrel.width, squirrel.height);
+    else { ctx.fillStyle = "#222"; ctx.fillRect(0, 0, 1920, 1080); }
 
+    // Eichhörnchen zeichnen
+    if(squirrelImg.complete) {
+        ctx.drawImage(squirrelImg, squirrel.x, squirrel.y, squirrel.width, squirrel.height);
+    } else {
+        ctx.fillStyle = "orange";
+        ctx.fillRect(squirrel.x, squirrel.y, squirrel.width, squirrel.height);
+    }
+
+    // Nüsse zeichnen
     for (let n of nuts) {
-        let img = n.type === 'bomb' ? bombImg : (n.type === 'gold' ? goldNutImg : nutImg);
-        if(img.complete) ctx.drawImage(img, n.x, n.y, n.width, n.height);
-        else {
-            ctx.fillStyle = n.type === 'bomb' ? "red" : (n.type === 'gold' ? "gold" : "saddlebrown");
+        let img = nutImg;
+        if (n.type === 'gold' && goldNutImg.complete) img = goldNutImg;
+        else if (n.type === 'bomb' && bombImg.complete) img = bombImg;
+
+        if(img.complete) {
+            ctx.drawImage(img, n.x, n.y, n.width, n.height);
+        } else {
+            // Fallback-Farben, falls Bilder nicht laden
+            if (n.type === 'gold') ctx.fillStyle = "gold";
+            else if (n.type === 'bomb') ctx.fillStyle = "red";
+            else ctx.fillStyle = "saddlebrown";
             ctx.fillRect(n.x, n.y, n.width, n.height);
         }
     }
 
+    // UI (Punkte & Zeit) zeichnen
     ctx.font = "bold 60px sans-serif";
     ctx.lineWidth = 5;
     ctx.strokeStyle = "black";
     ctx.fillStyle = "white";
+
     ctx.textAlign = "left";
     ctx.strokeText("Punkte: " + score, 40, 80);
     ctx.fillText("Punkte: " + score, 40, 80);
+
     ctx.textAlign = "right";
     ctx.strokeText("Zeit: " + timeLeft + "s", 1920 - 40, 80);
     ctx.fillText("Zeit: " + timeLeft + "s", 1920 - 40, 80);
@@ -145,7 +203,7 @@ function gameLoop() {
 
 function endGame(timerInterval) {
     gameActive = false;
-    if (timerInterval) clearInterval(timerInterval);
+    if(timerInterval) clearInterval(timerInterval);
     displayHighscores();
 }
 
@@ -157,19 +215,25 @@ function displayHighscores() {
     const heading = document.querySelector("#highscore-screen h2");
 
     highscoreScreen.style.display = "block";
-    if (heading) heading.innerText = "Spiel vorbei!";
-    list.innerHTML = `<li style="list-style: none; margin-top: 20px; font-size: 24px;">Dein Ergebnis: <b>${score} Punkte</b> 🐿️</li>`;
+    if(heading) heading.innerText = "Dein Score";
     
+    // Aktuellen Score anzeigen
+    list.innerHTML = `<li style="list-style: none; margin-top: 20px; font-size: 24px;">
+        Du hast <b>${score} Punkte</b> gesammelt! 🐿️
+    </li>`;
+
+    // Countdown bis zum Neustart
     restartButton.style.display = "none";
     countdownText.style.display = "block";
 
-    let waitTime = 10;
-    countdownText.innerText = `Nächste Runde möglich in ${waitTime} Sekunden...`;
+    let waitTime = 5; // Verkürzt auf 5 Sekunden, damit es schneller geht
+    countdownText.innerText = `Nächste Runde in ${waitTime} Sek...`;
     
     const countdownInterval = setInterval(() => {
         waitTime--;
-        if(waitTime > 0) countdownText.innerText = `Nächste Runde möglich in ${waitTime} Sekunden...`;
-        else {
+        if(waitTime > 0) {
+            countdownText.innerText = `Nächste Runde in ${waitTime} Sek...`;
+        } else {
             clearInterval(countdownInterval);
             countdownText.style.display = "none";
             restartButton.style.display = "inline-block";
