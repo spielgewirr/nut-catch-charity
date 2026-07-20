@@ -13,14 +13,33 @@ const bgImg = new Image(); bgImg.src = "bg.png";
 const squirrelImg = new Image(); squirrelImg.src = "squirrel.png";
 const nutImg = new Image(); nutImg.src = "nut.png";
 const goldNutImg = new Image(); goldNutImg.src = "goldnut.png";
-const bombImg = new Image(); bombImg.src = "bombnut.png"; // NEU: Bomben-Bild
+const bombImg = new Image(); bombImg.src = "bombnut.png";
 
 const squirrel = {
     x: 1920 / 2 - 100, y: 1080 - 220, width: 200, height: 200, speed: 15,
     movingLeft: false, movingRight: false
 };
 
-// ... (Login-Button Code bleibt gleich) ...
+// Steuerung
+window.addEventListener("keydown", (e) => {
+    if (e.code === "ArrowLeft" || e.code === "KeyA") squirrel.movingLeft = true;
+    if (e.code === "ArrowRight" || e.code === "KeyD") squirrel.movingRight = true;
+});
+window.addEventListener("keyup", (e) => {
+    if (e.code === "ArrowLeft" || e.code === "KeyA") squirrel.movingLeft = false;
+    if (e.code === "ArrowRight" || e.code === "KeyD") squirrel.movingRight = false;
+});
+window.addEventListener("touchstart", (e) => {
+    if(!gameActive) return;
+    const touchX = e.touches[0].clientX;
+    const screenWidth = window.innerWidth;
+    if(touchX < screenWidth / 2) squirrel.movingLeft = true;
+    else squirrel.movingRight = true;
+});
+window.addEventListener("touchend", () => {
+    squirrel.movingLeft = false;
+    squirrel.movingRight = false;
+});
 
 document.getElementById("login-button").addEventListener("click", () => {
     const input = document.getElementById("password-input").value;
@@ -49,13 +68,11 @@ function startGame() {
     gameLoop();
 }
 
-// ... (Event-Listener für Bewegung bleiben gleich) ...
-
 function spawnNut() {
     let rand = Math.random();
     let type = 'normal';
-    if (rand < 0.05) type = 'bomb';      // 5% Bombe
-    else if (rand < 0.15) type = 'gold'; // 10% Gold
+    if (rand < 0.05) type = 'bomb';
+    else if (rand < 0.15) type = 'gold';
 
     nuts.push({
         x: Math.random() * (1920 - 60), y: -60, width: 60, height: 60,
@@ -79,9 +96,9 @@ function updateGame() {
             n.y < squirrel.y + squirrel.height && n.y + n.height > squirrel.y) {
             
             if (n.type === 'bomb') {
-                new Audio('bang.mp3').play(); // Knall-Sound
-                gameActive = false; // Spiel sofort aus
-                endGame(null); // Spiel beenden
+                new Audio('bang.mp3').play();
+                gameActive = false;
+                endGame(null);
                 return;
             }
             
@@ -101,8 +118,22 @@ function drawGame() {
     for (let n of nuts) {
         let img = n.type === 'bomb' ? bombImg : (n.type === 'gold' ? goldNutImg : nutImg);
         if(img.complete) ctx.drawImage(img, n.x, n.y, n.width, n.height);
+        else {
+            ctx.fillStyle = n.type === 'bomb' ? "red" : (n.type === 'gold' ? "gold" : "saddlebrown");
+            ctx.fillRect(n.x, n.y, n.width, n.height);
+        }
     }
-    // ... (Score/Zeit Zeichnen bleibt gleich) ...
+
+    ctx.font = "bold 60px sans-serif";
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = "black";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "left";
+    ctx.strokeText("Punkte: " + score, 40, 80);
+    ctx.fillText("Punkte: " + score, 40, 80);
+    ctx.textAlign = "right";
+    ctx.strokeText("Zeit: " + timeLeft + "s", 1920 - 40, 80);
+    ctx.fillText("Zeit: " + timeLeft + "s", 1920 - 40, 80);
 }
 
 function gameLoop() {
@@ -121,14 +152,30 @@ function endGame(timerInterval) {
 function displayHighscores() {
     const highscoreScreen = document.getElementById("highscore-screen");
     const list = document.getElementById("highscore-list");
+    const countdownText = document.getElementById("countdown-text");
     const restartButton = document.getElementById("restart-button");
     const heading = document.querySelector("#highscore-screen h2");
 
     highscoreScreen.style.display = "block";
     if (heading) heading.innerText = "Spiel vorbei!";
-    list.innerHTML = `<li style="font-size: 24px;">Dein Ergebnis: <b>${score} Punkte</b> 🐿️</li>`;
-    restartButton.style.display = "inline-block";
+    list.innerHTML = `<li style="list-style: none; margin-top: 20px; font-size: 24px;">Dein Ergebnis: <b>${score} Punkte</b> 🐿️</li>`;
     
+    restartButton.style.display = "none";
+    countdownText.style.display = "block";
+
+    let waitTime = 10;
+    countdownText.innerText = `Nächste Runde möglich in ${waitTime} Sekunden...`;
+    
+    const countdownInterval = setInterval(() => {
+        waitTime--;
+        if(waitTime > 0) countdownText.innerText = `Nächste Runde möglich in ${waitTime} Sekunden...`;
+        else {
+            clearInterval(countdownInterval);
+            countdownText.style.display = "none";
+            restartButton.style.display = "inline-block";
+        }
+    }, 1000);
+
     restartButton.onclick = () => {
         highscoreScreen.style.display = "none";
         startGame();
