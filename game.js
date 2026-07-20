@@ -157,6 +157,9 @@ function gameLoop() {
 function endGame(timerInterval) {
     gameActive = false;
     clearInterval(timerInterval);
+    
+    // Hier wird das Pop-up komplett übersprungen
+    // und direkt deine visuelle Anzeige aufgerufen:
     displayHighscores();
 }
 
