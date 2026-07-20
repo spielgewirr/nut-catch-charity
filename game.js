@@ -1,4 +1,6 @@
 const SECRET_PASSWORD = "1aWuselSupport2026";
+
+// 1. Initialisierung - Diese Elemente müssen im HTML existieren
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -8,7 +10,7 @@ let gameActive = false;
 let nuts = [];
 let dropTimer = 0;
 
-// Hier werden die Bilder geladen
+// Bilder laden
 const bgImg = new Image(); bgImg.src = "bg.png";
 const squirrelImg = new Image(); squirrelImg.src = "squirrel.png";
 const nutImg = new Image(); nutImg.src = "nut.png";
@@ -20,19 +22,7 @@ const squirrel = {
     movingLeft: false, movingRight: false
 };
 
-// LOGIN LOGIK: Button reagiert nur, wenn Passwort stimmt
-document.getElementById("login-button").onclick = () => {
-    const input = document.getElementById("password-input").value;
-    if (input === SECRET_PASSWORD) {
-        document.getElementById("login-screen").style.display = "none";
-        document.getElementById("game-container").style.display = "block";
-        startGame();
-    } else {
-        alert("Passwort falsch!");
-    }
-};
-
-// STEUERUNG
+// 2. STEUERUNG (Global registriert, damit sie immer greift)
 document.addEventListener("keydown", (e) => {
     if (e.code === "ArrowLeft" || e.code === "KeyA") squirrel.movingLeft = true;
     if (e.code === "ArrowRight" || e.code === "KeyD") squirrel.movingRight = true;
@@ -42,10 +32,27 @@ document.addEventListener("keyup", (e) => {
     if (e.code === "ArrowRight" || e.code === "KeyD") squirrel.movingRight = false;
 });
 
+// 3. LOGIN LOGIK (Wird erst ausgeführt, wenn das Dokument bereit ist)
+window.onload = function() {
+    const loginBtn = document.getElementById("login-button");
+    if(loginBtn) {
+        loginBtn.onclick = function() {
+            const input = document.getElementById("password-input").value;
+            if (input === SECRET_PASSWORD) {
+                document.getElementById("login-screen").style.display = "none";
+                document.getElementById("game-container").style.display = "block";
+                startGame();
+            } else {
+                alert("Passwort falsch!");
+            }
+        };
+    }
+};
+
+// 4. SPIEL-FUNKTIONEN
 function startGame() {
     score = 0; timeLeft = 60; nuts = []; gameActive = true;
     squirrel.x = 1920 / 2 - 100;
-    
     const timerInterval = setInterval(() => {
         if(gameActive) {
             timeLeft--;
@@ -75,8 +82,9 @@ function updateGame() {
 
         if (n.x < squirrel.x + squirrel.width && n.x + n.width > squirrel.x &&
             n.y < squirrel.y + squirrel.height && n.y + n.height > squirrel.y) {
+            
             if (n.type === 'bomb') {
-                new Audio('bang.mp3').play().catch(e => {});
+                new Audio('bang.mp3').play().catch(e => console.log("Sound error"));
                 gameActive = false; endGame(null); return;
             }
             score += (n.type === 'gold') ? 50 : 10;
@@ -111,7 +119,6 @@ function gameLoop() {
 function endGame(timerInterval) {
     gameActive = false;
     if(timerInterval) clearInterval(timerInterval);
-    // Hier zeigen wir das Highscore-Display an, NICHT das Login-Display!
     const hs = document.getElementById("highscore-screen");
     hs.style.display = "block";
     document.getElementById("highscore-list").innerHTML = `<li>Dein Ergebnis: ${score} Punkte</li>`;
