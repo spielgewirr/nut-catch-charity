@@ -12,6 +12,7 @@ let dropTimer = 0;
 const bgImg = new Image(); bgImg.src = "bg.png";
 const squirrelImg = new Image(); squirrelImg.src = "squirrel.png";
 const nutImg = new Image(); nutImg.src = "nut.png";
+const goldNutImg = new Image(); goldNutImg.src = "goldnut.png"; // NEU: Das goldene Bild
 
 const squirrel = {
     x: 1920 / 2 - 100,
@@ -74,12 +75,14 @@ window.addEventListener("touchend", () => {
 });
 
 function spawnNut() {
+    let isGold = Math.random() < 0.1; // 10% Chance für Gold
     nuts.push({
         x: Math.random() * (1920 - 60),
         y: -60,
         width: 60,
         height: 60,
-        speed: Math.random() * 5 + 8
+        speed: isGold ? Math.random() * 5 + 12 : Math.random() * 5 + 8,
+        type: isGold ? 'gold' : 'normal'
     });
 }
 
@@ -102,7 +105,7 @@ function updateGame() {
             n.y < squirrel.y + squirrel.height &&
             n.y + n.height > squirrel.y) {
             
-            score += 10;
+            score += (n.type === 'gold') ? 50 : 10;
             nuts.splice(i, 1);
             continue;
         }
@@ -125,10 +128,11 @@ function drawGame() {
     }
 
     for (let n of nuts) {
-        if(nutImg.complete) {
-            ctx.drawImage(nutImg, n.x, n.y, n.width, n.height);
+        let img = (n.type === 'gold' && goldNutImg.complete) ? goldNutImg : nutImg;
+        if(img.complete) {
+            ctx.drawImage(img, n.x, n.y, n.width, n.height);
         } else {
-            ctx.fillStyle = "saddlebrown";
+            ctx.fillStyle = (n.type === 'gold') ? "gold" : "saddlebrown";
             ctx.fillRect(n.x, n.y, n.width, n.height);
         }
     }
@@ -171,7 +175,7 @@ function displayHighscores() {
     if (heading) heading.innerText = "Dein Score";
     
     list.innerHTML = `<li style="list-style: none; margin-top: 20px; font-size: 24px;">
-        Du hast gerade <b>${score} Punkte</b> gesammelt! ✨🐿️
+        Du hast gerade <b>${score} Punkte</b> gesammelt! 🐿️
     </li>`;
 
     restartButton.style.display = "none";
